@@ -1,0 +1,4 @@
+# Normalize line endings to LF in the repo (consistent across Windows + CI).
+* text=auto eol=lf
+*.png binary
+*.xlsx binary
