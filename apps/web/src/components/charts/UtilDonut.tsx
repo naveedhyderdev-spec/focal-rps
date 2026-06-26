@@ -1,11 +1,15 @@
 import { Doughnut } from 'react-chartjs-2';
-import { cssVar } from '../../lib/charts';
+import { cssVar, applyChartTheme } from '../../lib/charts';
+import { useAppStore } from '../../store/appStore';
 
 export function UtilDonut({ data }: { data: { label: string; value: number; color: string }[] }) {
+  const theme = useAppStore((s) => s.resolvedTheme);
+  applyChartTheme();
   const filtered = data.filter((d) => d.value > 0);
   if (filtered.length === 0) return <div className="muted" style={{ fontSize: 'var(--text-sm)', padding: 12 }}>No allocations to chart.</div>;
   return (
     <Doughnut
+      key={theme}
       data={{
         labels: filtered.map((d) => d.label),
         datasets: [{

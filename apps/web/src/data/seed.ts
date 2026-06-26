@@ -7,7 +7,7 @@
 import { v4 as uuid } from 'uuid';
 import {
   generateWeeksByCount, addWeeks, durationWeeks,
-  type Location, type Discipline, type Grade, type Team, type StageType,
+  type Location, type Discipline, type Grade, type Team, type StageType, type ProjectTypeOption,
   type Holiday, type Resource, type Project, type ProjectStage,
   type Allocation, type AppUser, type AppSettings, type ProjectType,
 } from '@engine';
@@ -19,6 +19,7 @@ export interface DemoData {
   grades: Grade[];
   teams: Team[];
   stageTypes: StageType[];
+  projectTypes: ProjectTypeOption[];
   holidays: Holiday[];
   resources: Resource[];
   projects: Project[];
@@ -75,6 +76,14 @@ export function buildDemoData(baseSettings: AppSettings): DemoData {
   const stageTypes: StageType[] = stageNames.map((name, i) => ({
     id: `st-${i}`, name, sort_order: i, is_active: true,
   }));
+
+  // ── Project types (the "Type" options shown in the project form; Admin-editable) ──
+  const projectTypes: ProjectTypeOption[] = [
+    { id: 'pt-eng', name: 'ENG', sort_order: 1, is_active: true },
+    { id: 'pt-multi', name: 'MULTI', sort_order: 2, is_active: true },
+    { id: 'pt-c', name: 'C', sort_order: 3, is_active: true },
+    { id: 'pt-m', name: 'M', sort_order: 4, is_active: true },
+  ];
 
   // ── Public holidays (demo; drive the pink shading) ──
   const holidays: Holiday[] = [
@@ -138,6 +147,7 @@ export function buildDemoData(baseSettings: AppSettings): DemoData {
       location_id: locByCode[locCode] ?? null,
       employment_type: 'In House',
       employee_code: `FOC-${String(i + 1).padStart(3, '0')}`,
+      email: `${forename.toLowerCase().replace(/\s+/g, '')}@focalpm.com`,
       role_title: roleTitle ?? gradeName,
       weekly_capacity_hours: 42.5,
       status: 'Active',
@@ -285,7 +295,7 @@ export function buildDemoData(baseSettings: AppSettings): DemoData {
   ];
 
   return {
-    locations, disciplines, grades, teams, stageTypes, holidays,
+    locations, disciplines, grades, teams, stageTypes, projectTypes, holidays,
     resources, projects, stages, allocations, users,
     settings: { ...baseSettings },
   };

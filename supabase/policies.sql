@@ -21,6 +21,7 @@ alter table disciplines     enable row level security;
 alter table grades          enable row level security;
 alter table teams           enable row level security;
 alter table stage_types     enable row level security;
+alter table project_types   enable row level security;
 alter table holidays        enable row level security;
 alter table settings        enable row level security;
 alter table resources       enable row level security;
@@ -35,7 +36,7 @@ alter table app_users       enable row level security;
 do $$
 declare t text;
 begin
-  foreach t in array array['locations','disciplines','grades','teams','stage_types','holidays',
+  foreach t in array array['locations','disciplines','grades','teams','stage_types','project_types','holidays',
       'settings','resources','projects','project_stages','allocations','look_ahead','activity_log','app_users']
   loop
     execute format('drop policy if exists "read_all" on %I;', t);
@@ -47,7 +48,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['locations','disciplines','grades','teams','stage_types','holidays',
+  foreach t in array array['locations','disciplines','grades','teams','stage_types','project_types','holidays',
       'resources','projects','project_stages','allocations','look_ahead']
   loop
     execute format('drop policy if exists "admin_write" on %I;', t);
@@ -77,6 +78,9 @@ begin
       raise exception 'At least one active Master Admin must remain';
     end if;
   end if;
+  -- A BEFORE DELETE trigger must return OLD (NEW is null on delete; returning it
+  -- silently cancels the delete). UPDATE/INSERT return NEW.
+  if tg_op = 'DELETE' then return old; end if;
   return new;
 end;
 $$ language plpgsql;

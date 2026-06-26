@@ -48,6 +48,19 @@ create table if not exists stage_types (
   is_active boolean not null default true
 );
 
+-- Admin-configurable "Type" options for projects (ENG, MULTI, C, …)
+create table if not exists project_types (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  sort_order int not null default 0,
+  is_active boolean not null default true
+);
+-- Seed a starter set only when the table is empty (safe to re-run; edit/reorder in Admin → Project Types).
+insert into project_types (name, sort_order, is_active)
+select v.name, v.sort_order, true
+from (values ('ENG', 1), ('MULTI', 2), ('C', 3), ('M', 4)) as v(name, sort_order)
+where not exists (select 1 from project_types);
+
 create table if not exists holidays (
   id uuid primary key default gen_random_uuid(),
   location_id uuid references locations(id) on delete set null,  -- null = all locations
@@ -71,6 +84,7 @@ create table if not exists resources (
   location_id uuid references locations(id) on delete set null,
   employment_type text not null default 'In House',
   employee_code text,
+  email text,                       -- work email; links a signed-up account to this person
   role_title text,
   weekly_capacity_hours numeric not null default 42.5,
   status text not null default 'Active',
@@ -79,9 +93,17 @@ create table if not exists resources (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+-- self-healing for installs created before the email column existed:
+alter table resources add column if not exists email text;
 create index if not exists idx_resources_team on resources(team_id);
 create index if not exists idx_resources_discipline on resources(discipline_id);
 create index if not exists idx_resources_status on resources(status);
+-- Employee ID + email are unique business/link keys: employee_code = the HR Employee ID,
+-- email = the address that links a signed-up login (auth.users) to this Person. Partial
+-- indexes so multiple rows may have NULL (people without a code/email yet). Email match
+-- is case-insensitive so "AkshayS@" and "akshays@" can't both exist.
+create unique index if not exists uq_resources_employee_code on resources (employee_code) where employee_code is not null;
+create unique index if not exists uq_resources_email on resources (lower(email)) where email is not null;
 
 -- ── Projects & stages ────────────────────────────────────────
 create table if not exists projects (
@@ -164,6 +186,16 @@ create table if not exists app_users (
   status text not null default 'Active',
   resource_id uuid references resources(id) on delete set null  -- links a Staff account to its person
 );
+-- Tie the profile to the auth login so deleting the user in
+-- Authentication → Users cascades and removes this row too.
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'app_users_id_fkey') then
+    alter table app_users
+      add constraint app_users_id_fkey
+      foreign key (id) references auth.users(id) on delete cascade;
+  end if;
+end $$;
 
 -- ── updated_at triggers ──
 drop trigger if exists trg_resources_updated on resources;
@@ -228,3 +260,60 @@ select dem.team_id, t.name as team_name, dem.week_start_date,
 from dem
 join teams t on t.id = dem.team_id
 left join cap on cap.team_id = dem.team_id;
+
+-- ============================================================
+-- Auth integration — auto-provision an app_users profile on signup.
+-- New sign-ups get a 'staff' profile; the Master Admin promotes them
+-- afterwards in Admin → Users. (id = auth.users.id so RLS resolves.)
+-- ============================================================
+create or replace function handle_new_user() returns trigger as $$
+begin
+  insert into public.app_users (id, email, name, role, status, resource_id)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
+    'staff',
+    'Active',
+    -- Auto-link to a pre-created Person with the same work email, if one exists.
+    (select id from public.resources where lower(email) = lower(new.email) limit 1)
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users for each row execute function handle_new_user();
+
+-- ── Restrict sign-ups to the company domain (hard guard; change the domain here) ──
+create or replace function enforce_email_domain() returns trigger as $$
+begin
+  if lower(new.email) not like '%@focalpm.com' then
+    raise exception 'Only @focalpm.com email addresses may register';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists enforce_email_domain_trg on auth.users;
+create trigger enforce_email_domain_trg
+  before insert on auth.users for each row execute function enforce_email_domain();
+
+-- ============================================================
+-- Realtime — publish the tables the app subscribes to so edits
+-- propagate to other users live (no-op if already published).
+-- ============================================================
+do $$
+declare t text;
+begin
+  foreach t in array array['allocations','projects','project_stages','resources','holidays',
+      'settings','app_users','activity_log','disciplines','teams','grades','locations','stage_types','project_types','look_ahead']
+  loop
+    begin
+      execute format('alter publication supabase_realtime add table %I', t);
+    exception when others then null;  -- already in publication
+    end;
+  end loop;
+end $$;

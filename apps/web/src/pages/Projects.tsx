@@ -160,7 +160,7 @@ export function Projects() {
           <Select value={fStatus} onChange={setFStatus} placeholder="All statuses" options={['Active', 'On Hold', 'Archived'].map((s) => ({ value: s, label: s }))} />
           <Select value={fLoc} onChange={setFLoc} placeholder="All locations" options={ref.locations.map((l) => ({ value: l.id, label: l.code }))} />
           <Select value={fPM} onChange={setFPM} placeholder="All PMs" options={pmOptions.map((p) => ({ value: p, label: p }))} />
-          <Select value={fType} onChange={setFType} placeholder="All types" options={['ENG', 'MULTI', 'C', 'M'].map((t) => ({ value: t, label: t }))} />
+          <Select value={fType} onChange={setFType} placeholder="All types" options={ref.projectTypes.map((t) => ({ value: t.name, label: t.name }))} />
           <div className="filter-spacer" />
           {(search || fStatus || fLoc || fPM || fType) && (
             <button className="btn btn-sm btn-ghost" onClick={() => { setSearch(''); setFStatus(''); setFLoc(''); setFPM(''); setFType(''); }}><i className="ti ti-x" /> Clear</button>

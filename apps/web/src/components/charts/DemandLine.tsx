@@ -1,6 +1,7 @@
 import { Line } from 'react-chartjs-2';
 import type { ScriptableContext } from 'chart.js';
-import { cssVar } from '../../lib/charts';
+import { cssVar, applyChartTheme } from '../../lib/charts';
+import { useAppStore } from '../../store/appStore';
 
 /**
  * Demand vs capacity over time — sleek, minimal (Apple/Whoop style): thin lines,
@@ -14,12 +15,15 @@ export function DemandLine({
   capacity: number[];
   height?: number;
 }) {
+  const theme = useAppStore((s) => s.resolvedTheme);
+  applyChartTheme();
   const accent = cssVar('--brand-accent');
   const capLine = cssVar('--capacity-line');
 
   return (
     <div style={{ height }}>
       <Line
+        key={theme}
         data={{
           labels,
           datasets: [

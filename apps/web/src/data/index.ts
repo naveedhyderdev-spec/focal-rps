@@ -19,6 +19,11 @@ export const provider: DataProvider = usingSupabase
   ? new SupabaseDataProvider(SUPABASE_URL!, SUPABASE_KEY!)
   : new LocalDataProvider();
 
+/** The shared Supabase client (auth + data use ONE client), or null in local mode. */
+export function getSupabaseClient() {
+  return usingSupabase ? (provider as SupabaseDataProvider).client() : null;
+}
+
 const INIT_FLAG = 'initialized';
 
 /**

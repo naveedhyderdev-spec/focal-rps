@@ -179,6 +179,34 @@ export function groupWeeksByMonth(weeks: string[]): MonthGroup[] {
   return groups;
 }
 
+export interface PeriodGroup {
+  key: string;    // YYYY-MM or YYYY-Qn
+  label: string;  // Jun-25 or Q2-25
+  weeks: string[];
+}
+
+/** Group ordered week-start dates into quarters (label `Q2-25`). */
+export function groupWeeksByQuarter(weeks: string[]): PeriodGroup[] {
+  const groups: PeriodGroup[] = [];
+  let current: PeriodGroup | null = null;
+  for (const w of weeks) {
+    const key = quarterKey(w);
+    if (!current || current.key !== key) {
+      current = { key, label: quarterLabel(w), weeks: [] };
+      groups.push(current);
+    }
+    current.weeks.push(w);
+  }
+  return groups;
+}
+
+/** Group ordered week-start dates by a period mode (week = one bucket each). */
+export function groupWeeksByPeriod(weeks: string[], mode: 'week' | 'month' | 'quarter'): PeriodGroup[] {
+  if (mode === 'month') return groupWeeksByMonth(weeks).map((g) => ({ key: g.key, label: g.label, weeks: g.weeks }));
+  if (mode === 'quarter') return groupWeeksByQuarter(weeks);
+  return weeks.map((w) => ({ key: w, label: shortDateLabel(w), weeks: [w] }));
+}
+
 /** Build a `weekStart -> "Jun W1"` lookup for the given ordered weeks. */
 export function weekLabelMap(weeks: string[]): Map<string, string> {
   const map = new Map<string, string>();

@@ -25,6 +25,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   bench_threshold: 50,
   overalloc_threshold: 110,
   master_data_admin_editable: true,
+  capacity_targets: {},
   version: '1.0.0',
 };
 
@@ -123,6 +124,7 @@ export class LocalDataProvider implements DataProvider {
   grades = makeRepo(db.grades);
   teams = makeRepo(db.teams);
   stageTypes = makeRepo(db.stageTypes);
+  projectTypes = makeRepo(db.projectTypes);
   holidays = makeRepo(db.holidays);
   resources = makeRepo(db.resources);
   projects = makeRepo(db.projects);
@@ -172,6 +174,7 @@ export class LocalDataProvider implements DataProvider {
       await db.grades.bulkPut(data.grades);
       await db.teams.bulkPut(data.teams);
       await db.stageTypes.bulkPut(data.stageTypes);
+      await db.projectTypes.bulkPut(data.projectTypes);
       await db.holidays.bulkPut(data.holidays);
       await db.resources.bulkPut(data.resources);
       await db.projects.bulkPut(data.projects);
@@ -191,7 +194,7 @@ export class LocalDataProvider implements DataProvider {
     await db.transaction('rw', db.tables, async () => {
       await Promise.all([
         db.locations.clear(), db.disciplines.clear(), db.grades.clear(),
-        db.teams.clear(), db.stageTypes.clear(), db.holidays.clear(),
+        db.teams.clear(), db.stageTypes.clear(), db.projectTypes.clear(), db.holidays.clear(),
         db.resources.clear(), db.projects.clear(), db.stages.clear(),
         db.allocations.clear(), db.lookAhead.clear(), db.activity.clear(),
       ]);

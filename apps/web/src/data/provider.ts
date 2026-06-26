@@ -7,7 +7,7 @@
  */
 
 import type {
-  Location, Discipline, Grade, Team, StageType, Holiday,
+  Location, Discipline, Grade, Team, StageType, ProjectTypeOption, Holiday,
   Resource, Project, ProjectStage, Allocation, LookAhead,
   ActivityLog, AppUser, AppSettings,
 } from '@engine';
@@ -46,6 +46,7 @@ export interface DataProvider {
   grades: Repo<Grade>;
   teams: Repo<Team>;
   stageTypes: Repo<StageType>;
+  projectTypes: Repo<ProjectTypeOption>;
   holidays: Repo<Holiday>;
   resources: Repo<Resource>;
   projects: Repo<Project>;

@@ -61,6 +61,7 @@ function resource(id: string, over: Partial<Resource> = {}): Resource {
     location_id: 'cok',
     employment_type: 'In House',
     employee_code: null,
+    email: null,
     role_title: null,
     weekly_capacity_hours: 42.5,
     status: 'Active',

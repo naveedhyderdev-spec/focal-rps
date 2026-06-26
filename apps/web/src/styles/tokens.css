@@ -1,55 +1,18 @@
 /* ============================================================
-   FOCAL — DARK THEME DESIGN TOKENS
-   Dark repackaging of the Focal brand system (Focal Middle East).
-   "We put the pieces together." Near-black ink ramp · Focal Blue brand ·
-   bright-blue on-dark accent · Poppins/Montserrat · architectural radii.
-   Semantic names are kept stable so components need no rewrite.
+   FOCAL — DESIGN TOKENS (dual theme)
+   Focal Middle East brand. Three layers (DSU-2 §2.1):
+   1) :root            — theme-agnostic primitives (type, space, radii, …)
+   2) :root,[data-theme=dark] — semantic DARK values (current, verbatim)
+   3) [data-theme=light]      — semantic LIGHT values
+   Component CSS only reads SEMANTIC vars, so flipping data-theme re-skins
+   the whole app with no component edits.
    ============================================================ */
-:root {
-  color-scheme: dark;
 
-  /* Brand core */
+/* ---------- 1 · Primitives (constant across themes) ---------- */
+:root {
+  /* Brand core (constant hue) */
   --brand-primary:   #1D4EC6;   /* Focal Blue — primary fill */
   --brand-secondary: #173C9C;   /* darker, for hover */
-  --brand-accent:    #4281FF;   /* bright blue — on-dark accent */
-
-  /* Neutral / ink ramp.
-     Backgrounds decouple via --content-bg/--card-bg below; the gray-50..200
-     steps are the LIGHTER washes used for hovers, headers, chips and dividers
-     (they step lighter as they rise on dark). gray-700..900 are text. */
-  --gray-50:  #1C1C22;   /* raised wash — table header, hover-on-card */
-  --gray-100: #26262E;   /* chip / stronger hover / overlay */
-  --gray-200: #2E2E38;   /* hairline borders & dividers */
-  --gray-300: #3C3C46;   /* hover border / stronger line */
-  --gray-400: #6E7689;   /* placeholder / subtle text & icons */
-  --gray-500: #868B95;   /* muted */
-  --gray-600: #9AA3B4;   /* muted text / captions */
-  --gray-700: #C2C8D4;   /* secondary text */
-  --gray-800: #DCE1EB;   /* body text */
-  --gray-900: #FFFFFF;   /* headings / key figures */
-
-  /* Surfaces (professional black canvas + ink elevation) */
-  --surface-page:    #0A0A0C;
-  --surface-card:    #131318;
-  --surface-raised:  #1C1C22;
-  --surface-overlay: #26262E;
-  --surface-sunken:  #050507;
-
-  /* Semantic colours (brightened for legibility on dark; soft fills = low-alpha tints) */
-  --color-success:    #34C98A;  --color-success-bg: rgba(52,201,138,.15);
-  --color-warning:    #E3AD3A;  --color-warning-bg: rgba(227,173,58,.15);
-  --color-danger:     #E2604F;  --color-danger-bg:  rgba(226,96,79,.15);
-  --color-info:       #4281FF;  --color-info-bg:    rgba(66,129,255,.15);
-  --color-purple:     #9A8CFF;  --color-purple-bg:  rgba(154,140,255,.17);
-
-  /* Discipline colours (consistent on chips, bars, charts) */
-  --disc-mech:  #4281FF;
-  --disc-elec:  #34C98A;
-  --disc-bim:   #9A8CFF;
-  --disc-arch:  #E8825A;
-  --disc-civil: #CCA24E;
-  --disc-plumb: #E2719F;
-  --disc-pm:    #9AA3B4;
 
   /* Layout */
   --sidebar-width:        232px;
@@ -62,57 +25,185 @@
   --space-4: 16px;  --space-5: 20px;  --space-6: 24px;
   --space-8: 32px;
 
-  /* Typography — Poppins (display/headings/buttons) + Montserrat (body/UI).
-     Kept on the app's dense px scale so existing layouts stay intact. */
+  /* Typography — Poppins (display) + Montserrat (body), dense px scale */
   --font-sans:    'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
   --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
   --text-xs:   11px;  --text-sm: 12px;  --text-base: 13px;
   --text-md:   14px;  --text-lg: 16px;  --text-xl:   20px;
-  --text-2xl:  26px;
+  --text-2xl:  26px;  --text-3xl: 34px; --text-4xl:  44px;
 
-  /* Borders & radii — architectural / square-edged */
-  --radius-sm:  4px;   /* buttons, inputs */
-  --radius-md:  6px;
-  --radius-lg:  10px;  /* cards */
-  --radius-xl:  14px;
+  /* Radii — soft & rounded (Donezo-style) */
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  18px;
+  --radius-xl:  24px;
   --radius-full: 9999px;
-  --border:       1px solid var(--border-subtle);
-  --border-subtle:  rgba(255,255,255,.08);
-  --border-default: rgba(255,255,255,.14);
-  --border-focus:   1px solid var(--brand-accent);
-
-  /* Shadows — dark-tuned, near-black, low spread */
-  --shadow-sm:  0 1px 2px rgba(0,0,0,.5);
-  --shadow-md:  0 6px 16px rgba(0,0,0,.5);
-  --shadow-lg:  0 14px 36px rgba(0,0,0,.58);
-  --shadow-xl:  0 20px 48px rgba(0,0,0,.62);
 
   /* Transitions — calm, no bounce */
   --transition-fast:   120ms cubic-bezier(0.4,0,0.2,1);
   --transition-base:   200ms cubic-bezier(0.4,0,0.2,1);
   --transition-slow:   320ms cubic-bezier(0.16,1,0.3,1);
 
-  /* Sidebar */
+  /* Composed tokens (reference per-theme semantic vars; resolve at use) */
+  --border:        1px solid var(--border-subtle);
+  --border-focus:  1px solid var(--brand-accent);
+  --content-bg:    var(--surface-page);
+  --card-bg:       var(--surface-card);
+  --card-border:   var(--border-subtle);
+  --topbar-border: var(--border-subtle);
+
+  /* Feature surfaces — intentionally identical in both themes (the accent-filled
+     KPI card and the dark "spotlight" card, à la the Donezo dashboard). */
+  --feature-bg:     linear-gradient(140deg, #2C63E0 0%, #1A45B4 100%);
+  --feature-fg:     #EAF1FF;
+  --feature-shadow: 0 14px 32px rgba(29,78,198,.34);
+  --card-dark-bg:   linear-gradient(150deg, #1C1E26 0%, #0D0E12 100%);
+  --card-dark-fg:   #E7EAF2;
+}
+
+/* ---------- 2 · Semantic — DARK (default + [data-theme=dark]) ---------- */
+:root, [data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Neutral / ink ramp: 50–200 = lighter washes/borders, 700–900 = text */
+  --gray-50:  #1C1C22;
+  --gray-100: #26262E;
+  --gray-200: #2E2E38;
+  --gray-300: #3C3C46;
+  --gray-400: #6E7689;
+  --gray-500: #868B95;
+  --gray-600: #9AA3B4;
+  --gray-700: #C2C8D4;
+  --gray-800: #DCE1EB;
+  --gray-900: #FFFFFF;
+
+  /* Surfaces (near-black; step LIGHTER as they rise) */
+  --surface-page:    #0A0A0C;
+  --surface-card:    #131318;
+  --surface-raised:  #1C1C22;
+  --surface-overlay: #26262E;
+  --surface-sunken:  #050507;
+
+  /* On-dark accent */
+  --brand-accent: #4281FF;
+  --text-link:    #81ABFF;
+
+  /* Status */
+  --color-success: #34C98A;  --color-success-bg: rgba(52,201,138,.15);
+  --color-warning: #E3AD3A;  --color-warning-bg: rgba(227,173,58,.15);
+  --color-danger:  #E2604F;  --color-danger-bg:  rgba(226,96,79,.15);
+  --color-info:    #4281FF;  --color-info-bg:    rgba(66,129,255,.15);
+  --color-purple:  #9A8CFF;  --color-purple-bg:  rgba(154,140,255,.17);
+
+  /* Disciplines */
+  --disc-mech:  #4281FF;
+  --disc-elec:  #34C98A;
+  --disc-bim:   #9A8CFF;
+  --disc-arch:  #E8825A;
+  --disc-civil: #CCA24E;
+  --disc-plumb: #E2719F;
+  --disc-pm:    #9AA3B4;
+
+  /* Borders */
+  --border-subtle:  rgba(255,255,255,.08);
+  --border-default: rgba(255,255,255,.14);
+
+  /* Shadows */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.5);
+  --shadow-md:  0 6px 16px rgba(0,0,0,.5);
+  --shadow-lg:  0 14px 36px rgba(0,0,0,.58);
+  --shadow-xl:  0 20px 48px rgba(0,0,0,.62);
+  --shadow-card: 0 1px 3px rgba(0,0,0,.45);   /* soft resting elevation for cards */
+
+  /* Sidebar + topbar chrome */
   --sidebar-bg:          #0E0E13;
   --sidebar-border:      rgba(255,255,255,.07);
   --sidebar-text:        #9AA3B4;
   --sidebar-text-hover:  #FFFFFF;
-  --sidebar-active-bg:   rgba(66,129,255,.14);
+  --sidebar-hover-bg:    rgba(255,255,255,.06);
+  --sidebar-active-bg:   rgba(66,129,255,.16);
   --sidebar-active-text: #81ABFF;
   --sidebar-active-border: #4281FF;
   --sidebar-icon:        #6E7689;
+  --topbar-bg:           #0E0E13;
 
-  /* Topbar / content / cards */
-  --topbar-bg:    #0E0E13;
-  --topbar-border: var(--border-subtle);
-  --content-bg:   var(--surface-page);
-  --card-bg:      var(--surface-card);
-  --card-border:  var(--border-subtle);
-
-  /* Calendar shading (Allocation Board) — dark-appropriate */
+  /* Calendar shading */
   --weekend-bg:    rgba(255,255,255,.035);
   --holiday-bg:    rgba(226,96,79,.13);
   --today-line:    #4281FF;
-  --capacity-line: rgba(255,255,255,.55);  /* light dashed reference on dark */
+  --capacity-line: rgba(255,255,255,.55);
+}
+
+/* ---------- 3 · Semantic — LIGHT ---------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Ink ramp inverts: 50–300 washes/borders, 400–900 text */
+  --gray-50:  #F0F1F4;
+  --gray-100: #ECEEF2;
+  --gray-200: #E2E5EA;
+  --gray-300: #D2D6DE;
+  --gray-400: #8A93A6;
+  --gray-500: #6B7382;
+  --gray-600: #586172;
+  --gray-700: #3C4456;
+  --gray-800: #1F2633;
+  --gray-900: #0C1019;
+
+  /* Surfaces (cool off-white; step DARKER as they rise) */
+  --surface-page:    #F3F5FA;
+  --surface-card:    #FFFFFF;
+  --surface-raised:  #FBFBFD;
+  --surface-overlay: #FFFFFF;
+  --surface-sunken:  #EFF1F6;
+
+  /* Accent deepened for AA on white */
+  --brand-accent: #2F6BEB;
+  --text-link:    #1D4EC6;
+
+  /* Status (deepened hue for ≥4.5:1 text; lighter tint bg) */
+  --color-success: #1F9D6B;  --color-success-bg: rgba(31,157,107,.12);
+  --color-warning: #B07A12;  --color-warning-bg: rgba(176,122,18,.13);
+  --color-danger:  #CB3A2C;  --color-danger-bg:  rgba(203,58,44,.10);
+  --color-info:    #1D4EC6;  --color-info-bg:    rgba(29,78,198,.10);
+  --color-purple:  #6B5BD6;  --color-purple-bg:  rgba(107,91,214,.12);
+
+  /* Disciplines (deepened for white chips) */
+  --disc-mech:  #1D4EC6;
+  --disc-elec:  #1F9D6B;
+  --disc-bim:   #6B5BD6;
+  --disc-arch:  #C25A30;
+  --disc-civil: #9A7416;
+  --disc-plumb: #C24A7C;
+  --disc-pm:    #586172;
+
+  /* Borders (dark-alpha hairlines) */
+  --border-subtle:  rgba(15,20,30,.08);
+  --border-default: rgba(15,20,30,.14);
+
+  /* Shadows (soft, cool-grey, airy) */
+  --shadow-sm:  0 1px 2px rgba(16,24,40,.05);
+  --shadow-md:  0 8px 24px rgba(16,24,40,.07);
+  --shadow-lg:  0 16px 40px rgba(16,24,40,.10);
+  --shadow-xl:  0 24px 56px rgba(16,24,40,.12);
+  --shadow-card: 0 2px 8px rgba(16,24,40,.05), 0 1px 2px rgba(16,24,40,.04);
+
+  /* Sidebar + topbar chrome (light) */
+  --sidebar-bg:          #FFFFFF;
+  --sidebar-border:      rgba(15,20,30,.07);
+  --sidebar-text:        #586172;
+  --sidebar-text-hover:  #0C1019;
+  --sidebar-hover-bg:    rgba(15,20,30,.045);
+  --sidebar-active-bg:   rgba(29,78,198,.10);
+  --sidebar-active-text: #1D4EC6;
+  --sidebar-active-border: #1D4EC6;
+  --sidebar-icon:        #8A93A6;
+  --topbar-bg:           #FFFFFF;
+
+  /* Calendar shading (light) */
+  --weekend-bg:    rgba(15,20,30,.04);
+  --holiday-bg:    rgba(203,58,44,.08);
+  --today-line:    #1D4EC6;
+  --capacity-line: rgba(15,20,30,.40);
 }

@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react';
 import {
   factorsByResourceWeek, factorToPercent, classifyBand, groupWeeksByMonth,
-  monthKey, monthLabel, addMonths, startOfWeek, todayISO,
+  generateWeeks, monthKey, monthLabel, addMonths, todayISO,
 } from '@engine';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Loading } from '../components/ui/Loading';
 import { Select } from '../components/ui/Field';
 import { resourcesH, useAllocations, useSettings } from '../hooks/useData';
 import { useReference } from '../hooks/useReference';
-import { useHorizonWeeks } from '../hooks/useDerived';
 import { downloadWorkbook, stampedName, type Cell } from '../lib/excel';
 import { useAppStore } from '../store/appStore';
 import { can } from '../lib/permissions';
@@ -29,7 +28,6 @@ export function Summary() {
   const { data: allocations } = useAllocations();
   const { data: settings } = useSettings();
   const ref = useReference();
-  const horizonWeeks = useHorizonWeeks();
   const role = useAppStore((s) => s.role);
   const toast = useAppStore((s) => s.toast);
   const canExport = can(role, 'export');
@@ -44,30 +42,37 @@ export function Summary() {
 
   const thresholds = settings?.util_thresholds;
 
-  // Month options across the horizon
+  // Rolling window: 1 year back → 1 year forward, centred on the current month
+  // (e.g. today Jun-26 → Jun-25 … Jun-27). Anchored to TODAY, so it advances each
+  // month. This only controls which month columns are shown — allocations outside
+  // the window are never deleted and still compute.
+  const summaryWeeks = useMemo(() => {
+    if (!settings) return [];
+    const firstOfMonth = `${todayISO().slice(0, 7)}-01`;       // first day of the current month
+    const windowStart = addMonths(firstOfMonth, -12);          // 1 year back (e.g. 2025-06-01)
+    const startKey = monthKey(windowStart);                    // e.g. 2025-06
+    const endKey = monthKey(addMonths(firstOfMonth, 12));      // e.g. 2027-06
+    return generateWeeks(windowStart, addMonths(firstOfMonth, 13), settings.week_start_day)
+      .filter((w) => { const k = monthKey(w); return k >= startKey && k <= endKey; });
+  }, [settings]);
+
+  // Month options across the rolling window
   const monthOptions = useMemo(() => {
     const seen = new Map<string, string>();
-    for (const w of horizonWeeks) if (!seen.has(monthKey(w))) seen.set(monthKey(w), monthLabel(w));
+    for (const w of summaryWeeks) if (!seen.has(monthKey(w))) seen.set(monthKey(w), monthLabel(w));
     return [...seen.entries()].map(([key, label]) => ({ key, label }));
-  }, [horizonWeeks]);
+  }, [summaryWeeks]);
 
-  // Default selection (until the user touches the filter): 6 months from a month before today.
-  const defaultMonths = useMemo(() => {
-    const keys = new Set<string>();
-    if (!settings || horizonWeeks.length === 0) return keys;
-    const start = startOfWeek(addMonths(todayISO(), -1), settings.week_start_day);
-    const end = addMonths(todayISO(), 5);
-    for (const w of horizonWeeks) if (w >= start && w <= end) keys.add(monthKey(w));
-    return keys;
-  }, [settings, horizonWeeks]);
+  // Default selection (until the user touches the filter): the whole window (current → +1 year).
+  const defaultMonths = useMemo(() => new Set(monthOptions.map((m) => m.key)), [monthOptions]);
 
   const effectiveMonths = touched ? selMonths : defaultMonths;
 
-  // Visible weeks = weeks in selected months (empty selection → all)
+  // Visible weeks = weeks in selected months (empty selection → all in the window)
   const visibleWeeks = useMemo(() => {
-    if (effectiveMonths.size === 0) return horizonWeeks;
-    return horizonWeeks.filter((w) => effectiveMonths.has(monthKey(w)));
-  }, [horizonWeeks, effectiveMonths]);
+    if (effectiveMonths.size === 0) return summaryWeeks;
+    return summaryWeeks.filter((w) => effectiveMonths.has(monthKey(w)));
+  }, [summaryWeeks, effectiveMonths]);
 
   const monthGroups = useMemo(() => groupWeeksByMonth(visibleWeeks), [visibleWeeks]);
 

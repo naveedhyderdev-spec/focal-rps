@@ -9,6 +9,7 @@ import { Sparkline } from '../components/ui/Sparkline';
 import { UtilDonut } from '../components/charts/UtilDonut';
 import { DemandLine } from '../components/charts/DemandLine';
 import { cssVar } from '../lib/charts';
+import { ExecutiveDashboard } from '../components/dashboard/ExecutiveDashboard';
 import { useSettings, useAllocations, resourcesH, projectsH, useActivity } from '../hooks/useData';
 import { useReference } from '../hooks/useReference';
 import { useWarnings, useHorizonWeeks } from '../hooks/useDerived';
@@ -129,9 +130,13 @@ export function Dashboard() {
         ))}
       </div>
 
-      {/* KPIs (always) */}
+      {persona === 'executive' ? (
+        <ExecutiveDashboard />
+      ) : (
+      <>
+      {/* KPIs */}
       <div className="metric-grid metric-grid-5" style={{ marginBottom: 'var(--space-6)' }}>
-        <div className="metric-card">
+        <div className="metric-card feature">
           <div className="metric-label"><i className="ti ti-folder" /> Total Projects</div>
           <div className="metric-value">{model.totalProjects}</div>
           <div className="metric-sub">Active programmes</div>
@@ -232,6 +237,8 @@ export function Dashboard() {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

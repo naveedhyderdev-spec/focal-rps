@@ -10,7 +10,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuid } from 'uuid';
 import type {
   Allocation, ActivityLog, AppSettings,
-  Location, Discipline, Grade, Team, StageType, Holiday, Project, ProjectStage, LookAhead, AppUser,
+  Location, Discipline, Grade, Team, StageType, ProjectTypeOption, Holiday, Project, ProjectStage, LookAhead, AppUser,
 } from '@engine';
 import type {
   DataProvider, Repo, AllocationRepo, ActivityRepo, CreateInput, UpdateInput,
@@ -22,7 +22,7 @@ const SETTINGS_KEY = 'app_settings';
 
 const TABLES = [
   'allocations', 'project_stages', 'projects', 'resources', 'look_ahead',
-  'holidays', 'stage_types', 'grades', 'disciplines', 'teams', 'locations', 'activity_log',
+  'holidays', 'stage_types', 'project_types', 'grades', 'disciplines', 'teams', 'locations', 'activity_log',
 ];
 
 function makeRepo<T extends { id: string }>(sb: SupabaseClient, table: string): Repo<T> {
@@ -112,6 +112,7 @@ export class SupabaseDataProvider implements DataProvider {
   grades: Repo<Grade>;
   teams: Repo<Team>;
   stageTypes: Repo<StageType>;
+  projectTypes: Repo<ProjectTypeOption>;
   holidays: Repo<Holiday>;
   resources: Repo<import('@engine').Resource>;
   projects: Repo<Project>;
@@ -128,6 +129,7 @@ export class SupabaseDataProvider implements DataProvider {
     this.grades = makeRepo<Grade>(this.sb, 'grades');
     this.teams = makeRepo<Team>(this.sb, 'teams');
     this.stageTypes = makeRepo<StageType>(this.sb, 'stage_types');
+    this.projectTypes = makeRepo<ProjectTypeOption>(this.sb, 'project_types');
     this.holidays = makeRepo<Holiday>(this.sb, 'holidays');
     this.resources = makeRepo<import('@engine').Resource>(this.sb, 'resources');
     this.projects = makeRepo<Project>(this.sb, 'projects');
@@ -182,7 +184,7 @@ export class SupabaseDataProvider implements DataProvider {
     const map = new Map<string, string>();
     const mid = (id: string) => { if (!map.has(id)) map.set(id, uuid()); return map.get(id)!; };
     [...demo.locations, ...demo.disciplines, ...demo.grades, ...demo.teams, ...demo.stageTypes,
-      ...demo.resources, ...demo.projects, ...demo.stages].forEach((e) => mid(e.id));
+      ...demo.projectTypes, ...demo.resources, ...demo.projects, ...demo.stages].forEach((e) => mid(e.id));
 
     const strip = <T extends object>(o: T) => { const { created_at, updated_at, ...rest } = o as T & { created_at?: unknown; updated_at?: unknown }; void created_at; void updated_at; return rest; };
 
@@ -193,6 +195,7 @@ export class SupabaseDataProvider implements DataProvider {
     await ins('grades', demo.grades.map((g) => ({ ...g, id: mid(g.id) })));
     await ins('teams', demo.teams.map((t) => ({ ...t, id: mid(t.id) })));
     await ins('stage_types', demo.stageTypes.map((s) => ({ ...s, id: mid(s.id) })));
+    await ins('project_types', demo.projectTypes.map((t) => ({ ...t, id: mid(t.id) })));
     await ins('holidays', demo.holidays.map((h) => ({ id: uuid(), date: h.date, name: h.name, location_id: h.location_id ? mid(h.location_id) : null })));
     await ins('resources', demo.resources.map((r) => strip({ ...r, id: mid(r.id), discipline_id: r.discipline_id ? mid(r.discipline_id) : null, grade_id: r.grade_id ? mid(r.grade_id) : null, team_id: r.team_id ? mid(r.team_id) : null, location_id: r.location_id ? mid(r.location_id) : null })));
     await ins('projects', demo.projects.map((p) => strip({ ...p, id: mid(p.id), location_id: p.location_id ? mid(p.location_id) : null })));

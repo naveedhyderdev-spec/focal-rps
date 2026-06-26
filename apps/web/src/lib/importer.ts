@@ -224,7 +224,7 @@ export async function commitImport(preview: ImportPreview): Promise<{ created: R
       forename: p.forename,
       full_name: p.full_name || composeFullName({ team: p.teamName, discipline: p.disciplineName, grade: p.gradeName, forename: p.forename }),
       discipline_id, grade_id, team_id, location_id,
-      employment_type: 'In House', employee_code: null, role_title: p.gradeName,
+      employment_type: 'In House', employee_code: null, email: null, role_title: p.gradeName,
       weekly_capacity_hours: 42.5, status: 'Active', join_date: null, notes: null,
     });
     resByFullName.set(p.full_name, row); created.resources++;
@@ -236,7 +236,7 @@ export async function commitImport(preview: ImportPreview): Promise<{ created: R
     const forename = name.split(' - ').pop() ?? name;
     const row = await provider.resources.create({
       forename, full_name: name, discipline_id: null, grade_id: null, team_id: null, location_id: null,
-      employment_type: 'In House', employee_code: null, role_title: null, weekly_capacity_hours: 42.5,
+      employment_type: 'In House', employee_code: null, email: null, role_title: null, weekly_capacity_hours: 42.5,
       status: 'Active', join_date: null, notes: null,
     });
     resByFullName.set(name, row); created.resources++;

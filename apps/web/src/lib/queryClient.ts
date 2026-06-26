@@ -22,6 +22,7 @@ export const qk = {
   grades: ['grades'] as const,
   teams: ['teams'] as const,
   stageTypes: ['stageTypes'] as const,
+  projectTypes: ['projectTypes'] as const,
   holidays: ['holidays'] as const,
   users: ['users'] as const,
   activity: ['activity'] as const,

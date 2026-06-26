@@ -4,10 +4,12 @@ import { Topbar } from './Topbar';
 import { Toaster } from '../ui/Toaster';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { useSettings } from '../../hooks/useData';
+import { useRealtime } from '../../hooks/useRealtime';
 
 export function Layout() {
   const { data: settings } = useSettings();
   const location = useLocation();
+  useRealtime();
   const year = new Date().getFullYear();
   const version = settings?.version ?? '1.0.0';
   return (

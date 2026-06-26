@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { durationWeeks, type Project, type ProjectStage, type ProjectStatus, type ProjectType } from '@engine';
+import { durationWeeks, type Project, type ProjectStage, type ProjectStatus } from '@engine';
 import { Modal } from '../ui/Modal';
 import { Field, Select } from '../ui/Field';
 import { projectsH } from '../../hooks/useData';
@@ -10,7 +10,6 @@ import { qk } from '../../lib/queryClient';
 import { useAppStore } from '../../store/appStore';
 
 const STATUSES: ProjectStatus[] = ['Active', 'On Hold', 'Archived'];
-const TYPES: ProjectType[] = ['ENG', 'MULTI', 'C', 'M'];
 
 interface StageDraft {
   id?: string;
@@ -93,7 +92,7 @@ export function ProjectModal({
       client: draft.client.trim() || null,
       location_id: draft.location_id || null,
       project_manager: draft.project_manager.trim() || null,
-      project_type: (draft.project_type || null) as ProjectType | null,
+      project_type: draft.project_type || null,
       status: draft.status,
       start_date: null,
       end_date: null,
@@ -139,6 +138,14 @@ export function ProjectModal({
     }
   };
 
+  // Configurable project-type options (Admin → Project Types). Keep a currently-set
+  // value visible even if it was later deactivated/removed, so editing doesn't lose it.
+  const activeTypes = ref.projectTypes.filter((t) => t.is_active);
+  const typeOptions = activeTypes.map((t) => ({ value: t.name, label: t.name }));
+  if (draft.project_type && !activeTypes.some((t) => t.name === draft.project_type)) {
+    typeOptions.unshift({ value: draft.project_type, label: `${draft.project_type} (inactive)` });
+  }
+
   return (
     <Modal
       open={open}
@@ -171,7 +178,7 @@ export function ProjectModal({
         </Field>
         <Field label="Type">
           <Select value={draft.project_type} onChange={(v) => set('project_type', v)} placeholder="—"
-            options={TYPES.map((t) => ({ value: t, label: t }))} />
+            options={typeOptions} />
         </Field>
         <Field label="Status">
           <Select value={draft.status} onChange={(v) => set('status', v as ProjectStatus)}

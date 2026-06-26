@@ -13,3 +13,7 @@ coverage/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Internal HR data — never commit employee PII to the (public) repo.
+# Keep this file locally and run it in the Supabase SQL editor only.
+supabase/seed_india_employees.sql

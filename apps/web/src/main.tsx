@@ -6,12 +6,18 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { HashRouter } from 'react-router-dom';
 import { queryClient } from './lib/queryClient';
 import { initData } from './data';
+import { useAppStore } from './store/appStore';
+import { AuthGate } from './components/auth/AuthGate';
 import { App } from './App';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 
 async function bootstrap() {
+  // Keep the resolved theme in sync with OS preference while mode === 'system'.
+  window.matchMedia?.('(prefers-color-scheme: dark)')
+    .addEventListener?.('change', () => useAppStore.getState().syncSystemTheme());
+
   // First-run seed of removable demo data (spec §8) before the first render.
   try {
     await initData();
@@ -24,7 +30,9 @@ async function bootstrap() {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <HashRouter>
-          <App />
+          <AuthGate>
+            <App />
+          </AuthGate>
         </HashRouter>
       </QueryClientProvider>
     </React.StrictMode>,

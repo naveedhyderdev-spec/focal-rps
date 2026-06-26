@@ -8,12 +8,12 @@ import { UserManagement } from '../components/admin/UserManagement';
 import { provider } from '../data';
 import {
   resourcesH, projectsH, useAllocations,
-  locationsH, disciplinesH, teamsH, gradesH, stageTypesH, holidaysH, useSettings,
+  locationsH, disciplinesH, teamsH, gradesH, stageTypesH, projectTypesH, holidaysH, useSettings,
 } from '../hooks/useData';
 import { useAppStore } from '../store/appStore';
 import { can, canManageMasterData, roleLabel } from '../lib/permissions';
 
-type Tab = 'settings' | 'teams' | 'disciplines' | 'grades' | 'locations' | 'stages' | 'holidays' | 'users' | 'data';
+type Tab = 'settings' | 'teams' | 'disciplines' | 'grades' | 'locations' | 'stages' | 'projectTypes' | 'holidays' | 'users' | 'data';
 const TABS: { key: Tab; label: string; icon: string }[] = [
   { key: 'settings', label: 'Settings', icon: 'ti-adjustments' },
   { key: 'users', label: 'Users', icon: 'ti-user-shield' },
@@ -22,6 +22,7 @@ const TABS: { key: Tab; label: string; icon: string }[] = [
   { key: 'grades', label: 'Grades', icon: 'ti-award' },
   { key: 'locations', label: 'Locations', icon: 'ti-map-pin' },
   { key: 'stages', label: 'Stages', icon: 'ti-timeline' },
+  { key: 'projectTypes', label: 'Project Types', icon: 'ti-category' },
   { key: 'holidays', label: 'Holidays', icon: 'ti-calendar-off' },
   { key: 'data', label: 'Demo data', icon: 'ti-database' },
 ];
@@ -87,6 +88,7 @@ export function Admin() {
   const gradeFields: FieldDef[] = [{ key: 'name', label: 'Grade', type: 'text', required: true }, { key: 'discipline_category', label: 'Category', type: 'text', placeholder: 'M / E / PH / GET' }, { key: 'sort_order', label: 'Order', type: 'number', width: '80px' }];
   const locFields: FieldDef[] = [{ key: 'code', label: 'Code', type: 'text', required: true, width: '90px' }, { key: 'name', label: 'Name', type: 'text', required: true }, { key: 'is_active', label: 'Active', type: 'toggle', default: true }];
   const stageFields: FieldDef[] = [{ key: 'name', label: 'Stage name', type: 'text', required: true }, { key: 'sort_order', label: 'Order', type: 'number', width: '80px' }, { key: 'is_active', label: 'Active', type: 'toggle', default: true }];
+  const projectTypeFields: FieldDef[] = [{ key: 'name', label: 'Type', type: 'text', required: true }, { key: 'sort_order', label: 'Order', type: 'number', width: '80px' }, { key: 'is_active', label: 'Active', type: 'toggle', default: true }];
   const holidayFields: FieldDef[] = [{ key: 'date', label: 'Date', type: 'date', required: true, width: '140px' }, { key: 'name', label: 'Holiday', type: 'text', required: true }, { key: 'location_id', label: 'Applies to', type: 'select', options: locationOptions, default: '' }];
 
   return (
@@ -110,6 +112,7 @@ export function Admin() {
       {activeTab === 'grades' && <MasterEditor title="Grades" hooks={gradesH} fields={gradeFields} sortBy={bySortOrder} />}
       {activeTab === 'locations' && <MasterEditor title="Locations" hooks={locationsH} fields={locFields} sortBy={(a, b) => a.code.localeCompare(b.code)} labelField="code" />}
       {activeTab === 'stages' && <MasterEditor title="Project Stages" description="Master list of stage names used in the project stage builder." hooks={stageTypesH} fields={stageFields} sortBy={bySortOrder} />}
+      {activeTab === 'projectTypes' && <MasterEditor title="Project Types" description="The Type options shown when creating or editing a project." hooks={projectTypesH} fields={projectTypeFields} sortBy={bySortOrder} />}
       {activeTab === 'holidays' && <MasterEditor title="Public Holidays" description="Holiday dates render with pink shading on the Allocation Board. Leave 'Applies to' as All for global holidays." hooks={holidaysH} fields={holidayFields} sortBy={(a, b) => a.date.localeCompare(b.date)} labelField="name" />}
 
       {activeTab === 'data' && (

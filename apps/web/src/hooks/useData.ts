@@ -111,6 +111,9 @@ export const teamsH = makeCrudHooks(qk.teams, provider.teams, 'team', {
 export const stageTypesH = makeCrudHooks(qk.stageTypes, provider.stageTypes, 'stage_type', {
   capCreate: 'manage_master_data', capUpdate: 'manage_master_data', capDelete: 'manage_master_data',
 });
+export const projectTypesH = makeCrudHooks(qk.projectTypes, provider.projectTypes, 'project_type', {
+  capCreate: 'manage_master_data', capUpdate: 'manage_master_data', capDelete: 'manage_master_data',
+});
 export const holidaysH = makeCrudHooks(qk.holidays, provider.holidays, 'holiday', {
   capCreate: 'manage_master_data', capUpdate: 'manage_master_data', capDelete: 'manage_master_data',
 });

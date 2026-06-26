@@ -8,7 +8,7 @@
 
 import Dexie, { type Table } from 'dexie';
 import type {
-  Location, Discipline, Grade, Team, StageType, Holiday,
+  Location, Discipline, Grade, Team, StageType, ProjectTypeOption, Holiday,
   Resource, Project, ProjectStage, Allocation, LookAhead,
   ActivityLog, AppUser,
 } from '@engine';
@@ -24,6 +24,7 @@ export class FocalDB extends Dexie {
   grades!: Table<Grade, string>;
   teams!: Table<Team, string>;
   stageTypes!: Table<StageType, string>;
+  projectTypes!: Table<ProjectTypeOption, string>;
   holidays!: Table<Holiday, string>;
   resources!: Table<Resource, string>;
   projects!: Table<Project, string>;
@@ -52,6 +53,10 @@ export class FocalDB extends Dexie {
       activity: 'id, created_at, entity, entity_id',
       users: 'id, email, role',
       meta: 'key',
+    });
+    // v2: configurable Project Types master list (keeps all v1 stores + data).
+    this.version(2).stores({
+      projectTypes: 'id, sort_order, is_active',
     });
   }
 }

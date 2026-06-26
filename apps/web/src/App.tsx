@@ -8,6 +8,7 @@ import { Board } from './pages/Board';
 import { Summary } from './pages/Summary';
 import { Graphs } from './pages/Graphs';
 import { Reports } from './pages/Reports';
+import { Capacity } from './pages/Capacity';
 import { Admin } from './pages/Admin';
 import { Search } from './pages/Search';
 import { MyAllocation } from './pages/MyAllocation';
@@ -32,6 +33,7 @@ export function App() {
         <Route path="/board" element={<Board />} />
         <Route path="/summary" element={<Summary />} />
         <Route path="/graphs" element={<Graphs />} />
+        <Route path="/capacity" element={<Capacity />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/search" element={<Search />} />

@@ -27,19 +27,35 @@ static bundle in `apps/web/dist`.
    ```
    On next start the app auto-selects `SupabaseDataProvider` (see
    `src/data/index.ts`). No code changes required.
-4. **Auth & roles.** Enable an auth provider (email/password is simplest) in
-   Supabase. For each person who signs in, insert an `app_users` row keyed by
-   their auth UID with the right role (`master_admin` | `admin` | `staff`):
-   ```sql
-   insert into app_users (id, email, name, role)
-   values ('<auth-uid>', 'me@focalpm.com', 'Owner', 'master_admin');
-   ```
-   RLS reads this row to authorize writes. The first **Master Admin** is added via
-   the SQL editor; afterwards they manage everyone in **Admin → Users** (promote to
-   Admin, deactivate, link Staff to a resource). A trigger keeps at least one active
-   Master Admin at all times.
-5. **Migrate existing data.** Use **Reports → Import live workbook** to load the
-   `Focal Resource Forecast` workbook, or run your own SQL inserts.
+4. **Auth (email + password, verified, @focalpm.com only).** In Supabase →
+   Authentication → Providers, ensure **Email** is enabled with **"Confirm email" ON**
+   (so new sign-ups must verify). Under **URL Configuration**, add your app URLs to
+   **Redirect URLs** (e.g. `http://localhost:5173`, and the GitHub Pages URL) so
+   verification/reset links return to the app. When env keys are set, the app shows
+   the **Login / Sign up / Forgot-password** screen; on sign-in it reads the user's
+   `app_users` row and that role drives the whole UI.
+   - **Domain lock:** `enforce_email_domain` (a `before insert` trigger on
+     `auth.users`) rejects any address that isn't `@focalpm.com`. Change the domain
+     there if needed. The signup form also validates this client-side.
+   - **Auto-provision + auto-link:** `handle_new_user` creates a `staff` `app_users`
+     row on first signup AND links it to a Person (`resources` row) whose `email`
+     matches — so "create the Person first, they sign up later" connects automatically.
+   - **Account already exists:** the signup form detects this and steers the user to
+     **Sign in** / **Forgot password**.
+   - **Bootstrap the first Master Admin** (one-time, after that person signs up &
+     verifies — you can also confirm them manually in Authentication → Users):
+     ```sql
+     update app_users set role = 'master_admin' where email = 'me@focalpm.com';
+     ```
+   - Everyone else is managed in-app: **Admin → Users** (promote to Admin, deactivate,
+     link to a resource). A trigger keeps ≥1 active Master Admin. **Never** put the
+     `service_role` key in the frontend — only the `anon` key.
+5. **Realtime** is already enabled by `schema.sql` (the tables are added to the
+   `supabase_realtime` publication), so edits propagate to other signed-in users
+   live — no extra setup.
+6. **Migrate existing data.** Sign in as the Master Admin, then use
+   **Reports → Import live workbook** to load the `Focal Resource Forecast`
+   workbook (or run SQL inserts).
 
 ## Hosting
 

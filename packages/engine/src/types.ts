@@ -67,6 +67,13 @@ export interface StageType {
   is_active: boolean;
 }
 
+export interface ProjectTypeOption {
+  id: string;
+  name: string; // ENG, MULTI, C, M, Refurb … — Admin-configurable project Type list
+  sort_order: number;
+  is_active: boolean;
+}
+
 export interface Holiday {
   id: string;
   location_id: string | null; // null = applies to all locations
@@ -97,6 +104,8 @@ export interface AppSettings {
   overalloc_threshold: number; // util% above which a week is over-allocated; default 110
   /** Whether Admins (not just Master Admin) may edit master data (RBAC §3 toggle). */
   master_data_admin_editable: boolean;
+  /** Manual "Required Capacity" targets — required FTE per discipline_id (DSU-2). */
+  capacity_targets: Record<string, number>;
   version: string;
 }
 
@@ -112,6 +121,7 @@ export interface Resource {
   location_id: string | null;
   employment_type: EmploymentType;
   employee_code: string | null;
+  email: string | null;           // work email; links a signed-up account to this person
   role_title: string | null;
   weekly_capacity_hours: number; // default 42.5
   status: ResourceStatus;
@@ -130,7 +140,7 @@ export interface Project {
   client: string | null;
   location_id: string | null;
   project_manager: string | null;
-  project_type: ProjectType | null;
+  project_type: string | null; // name of a ProjectTypeOption (Admin-configurable); free text
   status: ProjectStatus;
   start_date: string | null;
   end_date: string | null;

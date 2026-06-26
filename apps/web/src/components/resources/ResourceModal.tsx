@@ -20,6 +20,7 @@ interface Draft {
   team_id: string;
   location_id: string;
   employment_type: EmploymentType;
+  email: string;
   weekly_capacity_hours: number;
   status: ResourceStatus;
   join_date: string;
@@ -37,6 +38,7 @@ function toDraft(r: Resource | null, defaultCapacity: number): Draft {
     team_id: r?.team_id ?? '',
     location_id: r?.location_id ?? '',
     employment_type: r?.employment_type ?? 'In House',
+    email: r?.email ?? '',
     weekly_capacity_hours: r?.weekly_capacity_hours ?? defaultCapacity,
     status: r?.status ?? 'Active',
     join_date: r?.join_date ?? '',
@@ -97,6 +99,7 @@ export function ResourceModal({
       location_id: draft.location_id || null,
       employment_type: draft.employment_type,
       employee_code: draft.employee_code.trim() || null,
+      email: draft.email.trim() || null,
       role_title: draft.role_title.trim() || null,
       weekly_capacity_hours: Number(draft.weekly_capacity_hours),
       status: draft.status,
@@ -152,7 +155,11 @@ export function ResourceModal({
         </Field>
         <Field label="Grade">
           <Select value={draft.grade_id} onChange={(v) => set('grade_id', v)} placeholder="— Select grade —"
-            options={ref.grades.map((g) => ({ value: g.id, label: g.name }))} />
+            options={ref.grades.map((g) => {
+              const cat = g.discipline_category;
+              const show = cat && !g.name.toLowerCase().includes(cat.toLowerCase());
+              return { value: g.id, label: show ? `${g.name} (${cat})` : g.name };
+            })} />
         </Field>
       </div>
 
@@ -189,9 +196,14 @@ export function ResourceModal({
         </Field>
       </div>
 
-      <Field label="Role title">
-        <input className="form-control" value={draft.role_title} onChange={(e) => set('role_title', e.target.value)} placeholder="e.g. Design Manager" />
-      </Field>
+      <div className="form-row">
+        <Field label="Work email" hint="When they sign up with this email, their login auto-links to this person">
+          <input type="email" className="form-control" value={draft.email} onChange={(e) => set('email', e.target.value)} placeholder="name@focalpm.com" />
+        </Field>
+        <Field label="Role title">
+          <input className="form-control" value={draft.role_title} onChange={(e) => set('role_title', e.target.value)} placeholder="e.g. Design Manager" />
+        </Field>
+      </div>
 
       <Field label="Full name (display label)" hint="Auto-composed from team · discipline · grade · forename">
         <div className="row" style={{ gap: 8 }}>

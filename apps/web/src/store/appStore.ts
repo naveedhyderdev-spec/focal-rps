@@ -4,6 +4,7 @@
  */
 import { create } from 'zustand';
 import type { AppRole } from '@engine';
+import { getStoredTheme, resolveTheme, applyTheme, type ThemeMode, type ResolvedTheme } from '../lib/theme';
 
 export type Persona = 'resource_manager' | 'executive' | 'project_manager' | 'discipline_lead';
 
@@ -30,6 +31,18 @@ interface AppState {
   persona: Persona;
   setPersona: (p: Persona) => void;
 
+  // Predictive Hiring Forecast (BETA, opt-in)
+  forecastEnabled: boolean;
+  setForecastEnabled: (v: boolean) => void;
+  forecastHorizon: number; // weeks
+  setForecastHorizon: (n: number) => void;
+
+  // Theme
+  theme: ThemeMode;            // user choice (light | dark | system)
+  resolvedTheme: ResolvedTheme; // what is actually applied (light | dark)
+  setTheme: (mode: ThemeMode) => void;
+  syncSystemTheme: () => void;  // re-resolve while mode === 'system'
+
   toasts: ToastItem[];
   toast: (message: string, kind?: ToastItem['kind']) => void;
   dismissToast: (id: number) => void;
@@ -51,6 +64,16 @@ export const useAppStore = create<AppState>((set) => ({
 
   persona: 'resource_manager',
   setPersona: (persona) => set({ persona }),
+
+  forecastEnabled: false,
+  setForecastEnabled: (forecastEnabled) => set({ forecastEnabled }),
+  forecastHorizon: 8,
+  setForecastHorizon: (forecastHorizon) => set({ forecastHorizon }),
+
+  theme: getStoredTheme(),
+  resolvedTheme: resolveTheme(getStoredTheme()),
+  setTheme: (mode) => set({ theme: mode, resolvedTheme: applyTheme(mode, true) }),
+  syncSystemTheme: () => set((s) => (s.theme === 'system' ? { resolvedTheme: applyTheme('system', true) } : {})),
 
   toasts: [],
   toast: (message, kind = 'success') => {

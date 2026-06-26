@@ -42,6 +42,7 @@ insert into settings (key, value) values
     'bench_threshold', 50,
     'overalloc_threshold', 110,
     'master_data_admin_editable', true,
+    'capacity_targets', '{}'::jsonb,
     'version', '1.0.0'
   ))
 on conflict (key) do nothing;

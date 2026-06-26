@@ -5,6 +5,8 @@ import { useAppStore } from '../../store/appStore';
 import { useWarnings } from '../../hooks/useDerived';
 import { usersH } from '../../hooks/useData';
 import { ALL_ROLES, roleLabel } from '../../lib/permissions';
+import { ThemeToggle } from './ThemeToggle';
+import { usingSupabase, signOut } from '../../lib/auth';
 
 const TITLES: Record<string, string> = {
   '/': 'Dashboard',
@@ -85,6 +87,9 @@ export function Topbar() {
       </form>
 
       <div className="topbar-actions">
+        <ThemeToggle />
+        <div className="topbar-divider" />
+
         {/* Notifications */}
         <div className="dropdown">
           <button
@@ -120,29 +125,35 @@ export function Topbar() {
 
         {/* User menu + role switcher (frontend-first auth stand-in) */}
         <div className="dropdown">
-          <button className="topbar-btn" title="Account" onClick={() => setOpenMenu(openMenu === 'user' ? null : 'user')}>
-            <i className="ti ti-user" />
+          <button className="topbar-user" title="Account" onClick={() => setOpenMenu(openMenu === 'user' ? null : 'user')}>
+            <span className="topbar-user-avatar">{userName.slice(0, 2).toUpperCase()}</span>
+            <span className="topbar-user-name">{userName}</span>
+            <i className="ti ti-chevron-down" />
           </button>
           <div className={`dropdown-menu${openMenu === 'user' ? ' open' : ''}`}>
             <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--gray-100)' }}>
               <div style={{ fontWeight: 600 }}>{userName}</div>
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--gray-500)' }}>{roleLabel(role)}</div>
             </div>
-            <div style={{ padding: '8px 16px' }}>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--gray-500)', marginBottom: 6 }}>View as role</div>
-              {ALL_ROLES.map((r) => (
-                <button
-                  key={r}
-                  className={`btn btn-sm${role === r ? ' btn-primary' : ''}`}
-                  style={{ marginRight: 4, marginBottom: 4 }}
-                  onClick={() => switchRole(r)}
-                >
-                  {roleLabel(r)}
-                </button>
-              ))}
-            </div>
+            {!usingSupabase && (
+              <div style={{ padding: '8px 16px' }}>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--gray-500)', marginBottom: 6 }}>View as role</div>
+                {ALL_ROLES.map((r) => (
+                  <button
+                    key={r}
+                    className={`btn btn-sm${role === r ? ' btn-primary' : ''}`}
+                    style={{ marginRight: 4, marginBottom: 4 }}
+                    onClick={() => switchRole(r)}
+                  >
+                    {roleLabel(r)}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="dropdown-divider" />
-            <div className="dropdown-item danger"><i className="ti ti-logout" /> Sign out</div>
+            {usingSupabase
+              ? <div className="dropdown-item danger" onClick={() => signOut()}><i className="ti ti-logout" /> Sign out</div>
+              : <div className="dropdown-item" style={{ color: 'var(--gray-500)' }}><i className="ti ti-info-circle" /> Local demo · no sign-in</div>}
           </div>
         </div>
       </div>

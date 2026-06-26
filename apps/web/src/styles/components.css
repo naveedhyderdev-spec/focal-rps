@@ -5,7 +5,7 @@
 /* --- Buttons --- */
 .btn {
   display: inline-flex; align-items: center; gap: var(--space-2);
-  padding: 0 var(--space-4); height: 32px; border-radius: var(--radius-sm);
+  padding: 0 var(--space-4); height: 34px; border-radius: var(--radius-md);
   font-family: var(--font-display);
   font-size: var(--text-sm); font-weight: 500; border: 1px solid var(--border-default);
   background: var(--surface-raised); color: var(--gray-800); cursor: pointer; white-space: nowrap;
@@ -14,21 +14,23 @@
 }
 .btn:hover { background: var(--surface-overlay); border-color: var(--border-strong, rgba(255,255,255,.24)); color: var(--gray-900); }
 .btn:active { transform: translateY(1px); }
-.btn i { font-size: 15px; }
-.btn-primary { background: var(--brand-primary); color: #fff; border-color: var(--brand-primary); }
-.btn-primary:hover { background: var(--brand-secondary); border-color: var(--brand-secondary); }
-.btn-danger { background: var(--color-danger); color: #fff; border-color: var(--color-danger); }
+/* Icon sized close to the label text (was 15px next to 11–12px text → looked oversized). */
+.btn i { font-size: 14px; }
+.btn-sm i { font-size: 13px; }
+.btn-primary { background: var(--brand-primary); color: #fff; border-color: var(--brand-primary); box-shadow: 0 4px 12px rgba(29,78,198,.26); }
+.btn-primary:hover { background: var(--brand-secondary); border-color: var(--brand-secondary); box-shadow: 0 6px 18px rgba(29,78,198,.34); }
+.btn-danger { background: var(--color-danger); color: #fff; border-color: var(--color-danger); box-shadow: 0 4px 12px color-mix(in srgb, var(--color-danger) 30%, transparent); }
 .btn-danger:hover { background: #c73c3b; border-color: #c73c3b; }
-.btn-ghost { background: transparent; border-color: transparent; color: var(--gray-600); }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--gray-600); box-shadow: none; }
 .btn-ghost:hover { background: var(--gray-100); border-color: var(--gray-200); }
-.btn-sm { height: 26px; padding: 0 var(--space-3); font-size: var(--text-xs); }
-.btn-lg { height: 40px; padding: 0 var(--space-5); font-size: var(--text-md); }
-.btn-icon { width: 32px; padding: 0; justify-content: center; }
-.btn-icon.btn-sm { width: 26px; }
+.btn-sm { height: 28px; padding: 0 var(--space-3); font-size: var(--text-xs); }
+.btn-lg { height: 42px; padding: 0 var(--space-5); font-size: var(--text-md); }
+.btn-icon { width: 34px; padding: 0; justify-content: center; }
+.btn-icon.btn-sm { width: 28px; }
 .btn[disabled] { opacity: .45; pointer-events: none; }
 
 /* --- Cards --- */
-.card { background: var(--card-bg); border: var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.card { background: var(--card-bg); border: var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card); }
 .card-header { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-5); border-bottom: var(--border); }
 .card-title { font-size: var(--text-md); font-weight: 600; color: var(--gray-900); }
 .card-body { padding: var(--space-5); }
@@ -49,7 +51,7 @@
 .form-label { display: block; font-size: var(--text-sm); font-weight: 500; color: var(--gray-700); margin-bottom: var(--space-2); }
 .form-label .required { color: var(--color-danger); margin-left: 2px; }
 .form-control {
-  width: 100%; height: 34px; padding: 0 var(--space-3); border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+  width: 100%; height: 38px; padding: 0 var(--space-4); border: 1px solid var(--border-default); border-radius: var(--radius-md);
   font-size: var(--text-sm); color: var(--gray-800); background: var(--surface-sunken); outline: none;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast); font-family: var(--font-sans);
 }
@@ -93,24 +95,35 @@ textarea.form-control { height: auto; padding: var(--space-3); resize: vertical;
 .table th.sortable:hover { color: var(--gray-700); }
 .table th.sorted { color: var(--brand-primary); }
 .table-empty { text-align: center; padding: var(--space-8) var(--space-4); color: var(--gray-400); }
-.table-empty i { font-size: 32px; display: block; margin: 0 auto var(--space-3); opacity: .4; }
+.table-empty > i {
+  font-size: 28px; width: 60px; height: 60px; margin: 0 auto var(--space-4); opacity: 1;
+  display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full);
+  background: var(--color-info-bg); color: var(--brand-accent);
+}
 .cell-actions { display: flex; gap: 4px; justify-content: flex-end; }
 
 /* --- Metric cards --- */
-.metric-grid { display: grid; gap: var(--space-4); }
+.metric-grid { display: grid; gap: var(--space-5); }
 .metric-grid-4 { grid-template-columns: repeat(4, 1fr); }
 .metric-grid-5 { grid-template-columns: repeat(5, 1fr); }
 .metric-grid-3 { grid-template-columns: repeat(3, 1fr); }
-.metric-card { background: var(--card-bg); border: var(--border); border-radius: var(--radius-lg); padding: var(--space-5); }
+.metric-card { background: var(--card-bg); border: var(--border); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-card); }
 .metric-card.danger { background: var(--color-danger-bg); border-color: color-mix(in srgb, var(--color-danger) 45%, transparent); }
 .metric-card.warning { background: var(--color-warning-bg); border-color: color-mix(in srgb, var(--color-warning) 45%, transparent); }
 .metric-card.success { background: var(--color-success-bg); border-color: color-mix(in srgb, var(--color-success) 45%, transparent); }
-.metric-label { font-size: var(--text-sm); color: var(--gray-500); margin-bottom: var(--space-2); display: flex; align-items: center; gap: 6px; }
-.metric-value { font-size: var(--text-2xl); font-weight: 600; color: var(--gray-900); line-height: 1; }
+/* Feature (accent-filled) + dark "spotlight" KPI cards — the Donezo hero tiles */
+.metric-card.feature { background: var(--feature-bg); border-color: transparent; color: var(--feature-fg); box-shadow: var(--feature-shadow); }
+.metric-card.feature .metric-value { color: #fff; }
+.metric-card.feature .metric-label, .metric-card.feature .metric-sub { color: rgba(255,255,255,.80); }
+.metric-card.dark { background: var(--card-dark-bg); border-color: transparent; color: var(--card-dark-fg); }
+.metric-card.dark .metric-value { color: #fff; }
+.metric-card.dark .metric-label, .metric-card.dark .metric-sub { color: rgba(231,234,242,.66); }
+.metric-label { font-size: var(--text-sm); color: var(--gray-500); margin-bottom: var(--space-3); display: flex; align-items: center; gap: 6px; }
+.metric-value { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 700; color: var(--gray-900); line-height: 1; letter-spacing: -0.02em; }
 .metric-card.danger  .metric-value { color: var(--color-danger); }
 .metric-card.warning .metric-value { color: var(--color-warning); }
 .metric-card.success .metric-value { color: var(--color-success); }
-.metric-sub { font-size: var(--text-xs); color: var(--gray-400); margin-top: var(--space-2); }
+.metric-sub { font-size: var(--text-xs); color: var(--gray-400); margin-top: var(--space-3); }
 .metric-sub.up   { color: var(--color-success); }
 .metric-sub.down { color: var(--color-danger); }
 
@@ -204,8 +217,13 @@ textarea.form-control { height: auto; padding: var(--space-3); resize: vertical;
 
 /* --- Empty state --- */
 .empty-state { text-align: center; padding: var(--space-8) var(--space-4); color: var(--gray-400); }
-.empty-state i { font-size: 40px; display: block; margin: 0 auto var(--space-4); opacity: .3; }
-.empty-state h3 { font-size: var(--text-md); font-weight: 500; color: var(--gray-600); margin-bottom: var(--space-2); }
+/* Direct child only — must NOT style icons inside the action button (e.g. the "+"). */
+.empty-state > i {
+  font-size: 32px; width: 72px; height: 72px; margin: 0 auto var(--space-4); opacity: 1;
+  display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full);
+  background: var(--color-info-bg); color: var(--brand-accent);
+}
+.empty-state h3 { font-size: var(--text-lg); font-weight: 600; color: var(--gray-700); margin-bottom: var(--space-2); }
 .empty-state p { font-size: var(--text-sm); max-width: 340px; margin: 0 auto var(--space-4); }
 
 /* --- Loading skeleton --- */

@@ -56,6 +56,38 @@ export function roundHours(hours: number): number {
   return Math.round(hours * 100) / 100;
 }
 
+/**
+ * Real (leave/holiday-adjusted) capacity breakdown for a group in a week
+ * (DSU-2 §3.4). `headcount` = people normally available (Active + On Leave);
+ * `onLeave` of them are out; `holidayDays` reduce those present by capacity/5 each.
+ * v1 treats On-Leave as whole-FTE for the period (precise per-day leave is future).
+ */
+export interface RealCapacity {
+  nominalHours: number;
+  leaveCutHours: number;
+  holidayCutHours: number;
+  realHours: number;
+}
+export function realCapacity(input: {
+  headcount: number;
+  onLeave: number;
+  holidayDays: number;
+  capacity?: number;
+}): RealCapacity {
+  const capacity = input.capacity ?? DEFAULT_WEEKLY_CAPACITY;
+  const present = Math.max(0, input.headcount - input.onLeave);
+  const nominalHours = input.headcount * capacity;
+  const leaveCutHours = input.onLeave * capacity;
+  const holidayCutHours = Math.min(input.holidayDays, 5) * (capacity / 5) * present;
+  const realHours = Math.max(0, nominalHours - leaveCutHours - holidayCutHours);
+  return {
+    nominalHours,
+    leaveCutHours,
+    holidayCutHours: Math.round(holidayCutHours * 100) / 100,
+    realHours: Math.round(realHours * 100) / 100,
+  };
+}
+
 /** The canonical factor → %/hours reference table from the spec. */
 export const FACTOR_REFERENCE = [
   { factor: 1.0, percent: 100, hours: 42.5 },
