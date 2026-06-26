@@ -10,6 +10,10 @@ import { ThemeToggle } from '../shell/ThemeToggle';
 // reset   = set a new password after arriving via a recovery link (AuthGate PASSWORD_RECOVERY)
 type Mode = 'signin' | 'signup' | 'code' | 'verify' | 'reset';
 
+// Email-code / OTP needs Supabase SMTP + a {{ .Token }} template + the prod Site URL.
+// Until that's configured, hide it so users stick to email + password sign-up.
+const EMAIL_OTP_ENABLED = false;
+
 /**
  * Auth screen (Supabase Auth). Returning users sign in with a password; first-time
  * employees and anyone who forgot their password use an emailed 6-digit OTP code,
@@ -159,7 +163,7 @@ export function Login({ initialMode = 'signin', onResetDone }: { initialMode?: M
               </>
             )}
 
-            {mode === 'signin' && (
+            {mode === 'signin' && EMAIL_OTP_ENABLED && (
               <div style={{ textAlign: 'right', marginBottom: 8 }}>
                 <button type="button" className="btn btn-sm btn-ghost" onClick={() => go('code')} style={{ padding: '2px 6px', fontSize: 'var(--text-xs)' }}>Forgot password?</button>
               </div>
