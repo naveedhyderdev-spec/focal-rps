@@ -10,9 +10,9 @@ import { ThemeToggle } from '../shell/ThemeToggle';
 // reset   = set a new password after arriving via a recovery link (AuthGate PASSWORD_RECOVERY)
 type Mode = 'signin' | 'signup' | 'code' | 'verify' | 'reset';
 
-// Email-code / OTP needs Supabase SMTP + a {{ .Token }} template + the prod Site URL.
-// Until that's configured, hide it so users stick to email + password sign-up.
-const EMAIL_OTP_ENABLED = false;
+// NOTE: the email-OTP ("code"/"verify") flow below is kept for later but has no UI
+// entry yet (needs Supabase SMTP + a {{ .Token }} template + the prod Site URL).
+// For now, first-time users set a password directly via "Forgot password" → signUp.
 
 /**
  * Auth screen (Supabase Auth). Returning users sign in with a password; first-time
@@ -50,7 +50,7 @@ export function Login({ initialMode = 'signin', onResetDone }: { initialMode?: M
         if (!isAllowedEmail(email)) throw new Error(`Please use your @${ALLOWED_EMAIL_DOMAIN} email address`);
         checkPassword();
         const result = await signUp(email.trim(), password);
-        if (result === 'exists') { setMode('signin'); setNotice(`An account for ${email.trim()} already exists — sign in below, or use “Forgot password?”.`); }
+        if (result === 'exists') { setMode('signin'); setNotice(`${email.trim()} already has an account — just sign in with your password below.`); }
         else if (result === 'confirm') { setMode('signin'); setNotice('Account created — check your email to verify, then sign in.'); }
         // 'created' → a session exists (email confirmation OFF) → AuthGate loads the app.
       } else if (mode === 'code') {
@@ -89,14 +89,14 @@ export function Login({ initialMode = 'signin', onResetDone }: { initialMode?: M
 
   const titles: Record<Mode, string> = {
     signin: 'Sign in',
-    signup: 'Create your account',
+    signup: 'Set your password',
     code: 'Set up or reset your password',
     verify: 'Enter your code',
     reset: 'Set a new password',
   };
   const subtitles: Record<Mode, string> = {
     signin: '',
-    signup: `Use your @${ALLOWED_EMAIL_DOMAIN} email — your account links to your Person record automatically.`,
+    signup: `Enter your @${ALLOWED_EMAIL_DOMAIN} email and choose a password — that's it, you're in. (Links to your Person record automatically.)`,
     code: `First time here, or forgot your password? Enter your @${ALLOWED_EMAIL_DOMAIN} email and we'll send a code.`,
     verify: '',
     reset: '',
@@ -163,16 +163,16 @@ export function Login({ initialMode = 'signin', onResetDone }: { initialMode?: M
               </>
             )}
 
-            {mode === 'signin' && EMAIL_OTP_ENABLED && (
+            {mode === 'signin' && (
               <div style={{ textAlign: 'right', marginBottom: 8 }}>
-                <button type="button" className="btn btn-sm btn-ghost" onClick={() => go('code')} style={{ padding: '2px 6px', fontSize: 'var(--text-xs)' }}>Forgot password?</button>
+                <button type="button" className="btn btn-sm btn-ghost" onClick={() => go('signup')} style={{ padding: '2px 6px', fontSize: 'var(--text-xs)' }}>Forgot password?</button>
               </div>
             )}
 
             <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: 4 }} disabled={busy}>
               {busy ? <><i className="ti ti-loader-2" style={{ animation: 'spin 1s linear infinite' }} /> Please wait…</>
                 : mode === 'signin' ? <><i className="ti ti-login-2" /> Sign in</>
-                : mode === 'signup' ? <><i className="ti ti-user-plus" /> Create account</>
+                : mode === 'signup' ? <><i className="ti ti-key" /> Set password & sign in</>
                 : mode === 'code' ? <><i className="ti ti-mail" /> Send code</>
                 : mode === 'verify' ? <><i className="ti ti-check" /> Verify & set password</>
                 : <><i className="ti ti-check" /> Update password</>}
@@ -180,8 +180,8 @@ export function Login({ initialMode = 'signin', onResetDone }: { initialMode?: M
           </form>
 
           <div className="muted" style={{ fontSize: 'var(--text-sm)', textAlign: 'center', marginTop: 'var(--space-5)' }}>
-            {mode === 'signin' && <>New here? <button type="button" className="btn btn-sm btn-ghost" onClick={() => go('signup')}>Create an account</button></>}
-            {mode === 'signup' && <>Already have an account? <button type="button" className="btn btn-sm btn-ghost" onClick={() => go('signin')}>Sign in</button></>}
+            {mode === 'signin' && <>First time here? <button type="button" className="btn btn-sm btn-ghost" onClick={() => go('signup')}>Set your password</button></>}
+            {mode === 'signup' && <>Already set up? <button type="button" className="btn btn-sm btn-ghost" onClick={() => go('signin')}>Sign in</button></>}
             {(mode === 'code' || mode === 'verify') && <button type="button" className="btn btn-sm btn-ghost" onClick={() => go('signin')}><i className="ti ti-arrow-left" /> Back to sign in</button>}
           </div>
         </div>
